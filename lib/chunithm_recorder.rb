@@ -46,7 +46,7 @@ class ChunithmRecorder
     @driver.find_element(:class_name, 'btn_select_aime').click
   end
 
-  def fetch_chunithm_record(day)
+  def fetch_chunithm_record(day = Time.now-60*60*24)
     login_chunithm
     @driver.navigate.to 'https://chunithm-net.com/mobile/record/playlog'
     records = []
@@ -78,10 +78,10 @@ class ChunithmRecorder
         tap, hold, slide, air, flick = @driver.find_elements(:xpath, '//div[contains(@class, "play_musicdata_notesnumber")]').map(&:text).map(&:chop).map(&:to_f)
         @driver.navigate.to 'https://chunithm-net.com/mobile/record/playlog'
         records << {
-          'title' => title,
-          'score' => score,
           'date' => date,
+          'title' => title,
           'difficulty' => difficulty,
+          'score' => score,
           'max_combo' => max_combo,
           'justice_critical' => justice_critical,
           'justice' => justice,
@@ -106,6 +106,20 @@ class ChunithmRecorder
       end
     end
     records
+  end
+
+  def hash_list_to_csv_array( list, key_order=nil )
+    key_order ||= list.map(&:keys).flatten.uniq
+    arr = list.map do |hash|
+      key_order.map{|key| hash[key]}
+    end
+    arr.unshift(key_order)
+  end
+
+  def save_csv(records)
+    File.open('tmp.csv', 'a') do |f|
+      f.puts hash_list_to_csv_array(records.reverse).map(&:to_csv).join
+    end
   end
 
   def load_to_bq(records, table_id)
@@ -239,3 +253,11 @@ class ChunithmRecorder
   end
 end
 
+return unless $0 == __FILE__
+
+require 'csv'
+
+cr = ChunithmRecorder.new
+cr.initialize_webdriver
+records = cr.fetch_chunithm_record
+cr.save_csv(records)
