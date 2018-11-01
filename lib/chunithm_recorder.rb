@@ -46,7 +46,7 @@ class ChunithmRecorder
     @driver.find_element(:class_name, 'btn_select_aime').click
   end
 
-  def fetch_chunithm_record(day)
+  def fetch_chunithm_record(day = Time.now-60*60*24)
     login_chunithm
     @driver.navigate.to 'https://chunithm-net.com/mobile/record/playlog'
     records = []
@@ -253,3 +253,11 @@ class ChunithmRecorder
   end
 end
 
+return unless $0 == __FILE__
+
+require 'csv'
+
+cr = ChunithmRecorder.new
+cr.initialize_webdriver
+records = cr.fetch_chunithm_record
+cr.save_csv(records)
