@@ -78,10 +78,10 @@ class ChunithmRecorder
         tap, hold, slide, air, flick = @driver.find_elements(:xpath, '//div[contains(@class, "play_musicdata_notesnumber")]').map(&:text).map(&:chop).map(&:to_f)
         @driver.navigate.to 'https://chunithm-net.com/mobile/record/playlog'
         records << {
-          'title' => title,
-          'score' => score,
           'date' => date,
+          'title' => title,
           'difficulty' => difficulty,
+          'score' => score,
           'max_combo' => max_combo,
           'justice_critical' => justice_critical,
           'justice' => justice,
