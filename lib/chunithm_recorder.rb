@@ -108,6 +108,20 @@ class ChunithmRecorder
     records
   end
 
+  def hash_list_to_csv_array( list, key_order=nil )
+    key_order ||= list.map(&:keys).flatten.uniq
+    arr = list.map do |hash|
+      key_order.map{|key| hash[key]}
+    end
+    arr.unshift(key_order)
+  end
+
+  def save_csv(records)
+    File.open('tmp.csv', 'a') do |f|
+      f.puts hash_list_to_csv_array(records.reverse).map(&:to_csv).join
+    end
+  end
+
   def load_to_bq(records, table_id)
     File.open('tmp.json', 'w') do |f|
       records.each do |r|
